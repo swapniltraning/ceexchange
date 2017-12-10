@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: ceexchange
 version: v1
-baseUri: http://api.ce-exchange.com/0.1
+baseUri: https://mocksvc.mulesoft.com/mocks/f39333f8-611a-485a-ac35-3ab6d54014db/0.1 # baseUri: http://api.ce-exchange.com/0.1
 securitySchemes:
   basic:
     description: |
@@ -174,7 +174,7 @@ securitySchemes:
       Crypto currency name
     example: bitcoin
     required: true
-/listofCoins:
+/listOfCoins:
  description: |
    Provide the information on number of Crypto Currencies available
  get:
@@ -194,3 +194,47 @@ securitySchemes:
              "Name": "Ethereum"
             }
           ]
+/coinInfobySymbol:
+ description: |
+   Provide the information of Crypto Currencies available based on input symbol by user
+ get:
+  securedBy: [basic]
+  responses: 
+    200:
+      description: |
+        Get JSON response of Currency detail
+      body: 
+        application/json:
+         example: |
+          [
+            {
+             "id": "bitcoin",
+             "name": "Bitcoin",
+             "symbol": "BTC",
+             "rank": "1",
+             "price_usd": "12466.5",
+             "price_btc": "1.0",
+             "24h_volume_usd": "8074700000.0",
+             "market_cap_usd": "208476805773",
+             "available_supply": "16722962.0",
+             "total_supply": "16722962.0",
+             "max_supply": "21000000.0",
+             "percent_change_1h": "0.02",
+             "percent_change_24h": "6.87",
+             "percent_change_7d": "18.75",
+             "last_updated": "1512534554",
+             "price_aud": "16392.774309",
+             "24h_volume_aud": "10617794466.2",
+             "market_cap_aud": "274135741844"
+            }
+          ]
+  queryParameters:
+   sym:
+    displayName: sym
+    type: string
+    description: |    
+      Crypto currency Symbol
+    enum: [ETH, BTC, LTE]    
+    example: ETH
+    required: true
+
