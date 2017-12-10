@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
+	xmlns:ss="http://www.springframework.org/schema/security" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/schema/mule/spring-security/current/mule-spring-security.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/schema/mule/spring-security/3.1/mule-spring-security.xsd
+http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<spring:beans>
+		<ss:authentication-manager alias="authenticationManager" >
+			<ss:authentication-provider>
+				<ss:user-service id="userService">
+					<ss:user name="${base.auth.user.username}" password="${base.auth.user.password}" authorities="ROLE_ADMIN" />
+					<ss:user name="${base.auth.admin.username}" password="${base.auth.admin.password}" authorities="ROLE_DEV" />
+				</ss:user-service>
+			</ss:authentication-provider>
+		</ss:authentication-manager>
+	</spring:beans>
+
+	<mule-ss:security-manager name = "Spring_Security_Memory_Provider">
+		<mule-ss:delegate-security-provider
+			name="memory-provider" delegate-ref="authenticationManager" />
+	</mule-ss:security-manager>
+
+	<context:property-placeholder location="ceexchange-DEV.properties" />
+	<http:listener-config name="HTTP_Listener_Configuration"
+		host="${http.listner.host}" port="${http.listner.port}" doc:name="HTTP Listener Configuration" />
+	<http:request-config name="HTTP_Request_Configuration"
+		host="${http.request.host}" port="${http.request.port}" basePath="${http.request.basepath}"
+		doc:name="HTTP Request Configuration" />
+	<apikit:config xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+		name="ceexchange-config" raml="ceexchange.raml" consoleEnabled="false"
+		doc:name="Router" keepRamlBaseUri="false" />
+    <http:request-config name="HTTP_Request_Configuration_GlobalData" host="${http.request.host}" port="${http.request.port}" basePath="${http.request.globalbasepath}" doc:name="HTTP Request Configuration"/>
+
+</mule>

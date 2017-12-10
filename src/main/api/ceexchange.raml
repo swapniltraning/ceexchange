@@ -1,0 +1,196 @@
+#%RAML 1.0
+title: ceexchange
+version: v1
+baseUri: http://api.ce-exchange.com/0.1
+securitySchemes:
+  basic:
+    description: |
+      This API supports Basic Authentication.
+    type: Basic Authentication
+/exchangerate:
+ description: |
+   Retrive a specific crypto currency exchange value based on coin value input by user
+ get:
+  description: |
+    Get currency exchange rate
+  securedBy: [basic]
+  responses: 
+    200:
+     body: 
+       application/json:          
+        example: |
+          {
+           "Exchange Rate": "13047.2985457"
+          }        
+  queryParameters:
+   id:
+    displayName: id
+    type: string
+    description: |
+      Crypto currency name
+    example: bitcoin
+    required: true
+   numberOfCoin:
+    displayName: numberOfCoin
+    type: number
+    description: |
+      Number of Coins in whole number or in decimal 
+    example: 1
+    required: true
+
+/exchange:
+ description: |
+   Provide the information on ID, Name, Price, MarketCap and Percentage change in 24 hours of top 4 Crypto Currencies
+ get:
+  securedBy: [basic]
+  responses: 
+    200:
+      description: |
+        Get JSON response for property - ID, Name, Price, MarketCap and Percentage change in 24 hours of top 4 Crypto Currencies
+      body: 
+        application/json:
+         example: |
+          [
+            {
+             "ID": "ethereum",
+             "Name": "Ethereum",
+             "Price": " 570.516660393 ",
+             "MarketCap": " 54795143764.0 ",
+             "PercentageChange": " -10.91 "
+            }
+          ]
+/global:
+ description: |
+  Provide Global Data in AUD
+ get:
+  securedBy: [basic]
+  responses:
+    200:
+      description: |
+       GET JSON respinse for Global Data in AUD
+      body:
+        application/json:
+         example: |
+          [
+            {
+             "total_market_cap_usd": 342186020076,
+             "total_24h_volume_usd": 14244195176,
+             "bitcoin_percentage_of_market_cap": 55.91,
+             "active_currencies": 904,
+             "active_assets": 419,
+             "active_markets": 7070,
+              "last_updated": 1512384251,
+             "total_market_cap_aud": 450422537899,
+             "total_24h_volume_aud": 18749762308
+            }  
+          ]
+/exchangelimit:
+ description: |
+   Provide the information on ID, Name, Price, MarketCap and Percentage change in 24 hours etc  of Crypto Currencies within limits provided as input
+ get:
+  description: |
+    Get crypto currencies detail
+  securedBy: [basic]
+  responses: 
+    200:
+     body: 
+       application/json:          
+        example: |
+          {
+           "id": "bitcoin",
+           "name": "Bitcoin",
+           "symbol": "BTC",
+           "rank": "1",
+           "price_usd": "12470.1",
+           "price_btc": "1.0",
+           "24h_volume_usd": "8012800000.0",
+           "market_cap_usd": "208535611785",
+           "available_supply": "16722850.0",
+           "total_supply": "16722850.0",
+           "max_supply": "21000000.0",
+           "percent_change_1h": "0.94",
+           "percent_change_24h": "6.8",
+           "percent_change_7d": "19.54",
+           "last_updated": "1512531254",
+           "price_eur": "10542.0479586",
+           "24h_volume_eur": "6773908940.8",
+           "market_cap_eur": "176293086704"
+          }        
+  queryParameters:
+   start:
+    displayName: start
+    type: number
+    description: |
+      starting limit of crypto currency based on coin ranking 
+    example: 0
+    required: true
+   limit:
+    displayName: limit
+    type: number
+    description: |
+      limit of crypto currency based on coin ranking 
+    example: 1
+    required: true
+
+/currencyinfo:
+ description: |
+   Retrive a specific crypto currency information
+ get:
+  description: |
+    Get crypto currency information
+  securedBy: [basic]
+  responses: 
+    200:
+     body: 
+       application/json:          
+        example: |
+          [
+            {
+             "id": "bitcoin",
+             "name": "Bitcoin",
+             "symbol": "BTC",
+             "rank": "1",
+             "price_usd": "12466.5",
+             "price_btc": "1.0",
+             "24h_volume_usd": "8074700000.0",
+             "market_cap_usd": "208476805773",
+             "available_supply": "16722962.0",
+             "total_supply": "16722962.0",
+             "max_supply": "21000000.0",
+             "percent_change_1h": "0.02",
+             "percent_change_24h": "6.87",
+             "percent_change_7d": "18.75",
+             "last_updated": "1512534554",
+             "price_aud": "16392.774309",
+             "24h_volume_aud": "10617794466.2",
+             "market_cap_aud": "274135741844"
+            }
+          ]        
+  queryParameters:
+   id:
+    displayName: id
+    type: string
+    description: |
+      Crypto currency name
+    example: bitcoin
+    required: true
+/listofCoins:
+ description: |
+   Provide the information on number of Crypto Currencies available
+ get:
+  securedBy: [basic]
+  responses: 
+    200:
+      description: |
+        Get JSON response for list of Crypto Currencies available
+      body: 
+        application/json:
+         example: |
+          [
+            {
+             "Name": "Bitcoin"
+            },
+            {
+             "Name": "Ethereum"
+            }
+          ]

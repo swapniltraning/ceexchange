@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+  
+    <flow name="ceexchangeFlow">
+        <http:request config-ref="HTTP_Request_Configuration" path="/?convert=AUD&amp;limit=4" method="GET" doc:name="HTTP"/>
+        <json:json-to-object-transformer returnClass="java.util.List" doc:name="JSON to Object"/>
+        <collection-splitter enableCorrelation="ALWAYS" doc:name="Collection Splitter"/>
+        <logger message="#[message.rootId]----- #[message.correlationGroupSize]--------#[message.correlationSequence]" level="INFO" doc:name="Logger"/>
+        <set-payload value="{  &quot;ID&quot;: &quot;#[message.payload.id]&quot;,  &quot;Name&quot; : &quot;#[message.payload.name]&quot;,  &quot;Price&quot; : &quot; #[message.payload.price_aud] &quot;,  &quot;MarketCap&quot; : &quot; #[message.payload.market_cap_aud] &quot;,  &quot;PercentageChange&quot; : &quot; #[message.payload.percent_change_24h] &quot; }" doc:name="Set Payload"/>
+        <logger message="#[message.id]------------- #[message.correlationId]" level="INFO" doc:name="Copy_of_Logger"/>
+        <resequencer timeout="6000" failOnTimeout="false" doc:name="Resequencer">
+            <expression-message-info-mapping messageIdExpression="#[message.id]" correlationIdExpression="#[message.correlationId]"/>
+        </resequencer>
+        <collection-aggregator timeout="6000" failOnTimeout="false" doc:name="Collection Aggregator"/>
+        <message-properties-transformer doc:name="Message Properties">
+            <add-message-property key="Content-Type" value="application/json"/>
+        </message-properties-transformer>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <object-to-string-transformer doc:name="Object to String"/>
+    </flow>
+    <flow name="ceExchangeRateFlow">
+        <set-variable variableName="numberOfCoin" value="#[message.inboundProperties.'http.query.params'.numberOfCoin]" doc:name="Variable: numberOfCoin" />
+        <http:request config-ref="HTTP_Request_Configuration" path="{id}/?convert=AUD" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="#[message.inboundProperties.'http.query.params'.id]"/>
+            </http:request-builder>
+        </http:request>
+        <json:json-to-object-transformer returnClass="java.util.List" doc:name="JSON to Object" />
+        <set-payload value="{  &quot;Exchange Rate&quot;: &quot;#[message.payload[0].price_aud*1.0* flowVars.numberOfCoin ]&quot; }  " doc:name="Set Payload" />
+        <logger message="Exchange Rate -------- #[payload]" level="INFO" doc:name="Logger" />
+        <message-properties-transformer doc:name="Message Properties">
+            <add-message-property key="Content-Type" value="application/json" />
+        </message-properties-transformer>
+        <object-to-string-transformer doc:name="Object to String" />
+    </flow>
+    <flow name="ceexchangeGlobalDataFlow">
+        <http:request config-ref="HTTP_Request_Configuration_GlobalData" path="/?convert=AUD" method="GET" doc:name="HTTP"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <message-properties-transformer doc:name="Message Properties">
+            <add-message-property key="Content-Type" value="application/json"/>
+        </message-properties-transformer>
+        <object-to-string-transformer doc:name="Object to String"/>
+    </flow>
+    <flow name="ceexchangeLimitFlow">
+        <http:request config-ref="HTTP_Request_Configuration" path="/?convert=AUD&amp;start={start}&amp;limit={limit}" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:uri-param paramName="start" value="#[message.inboundProperties.'http.query.params'.start]"/>
+                <http:uri-param paramName="limit" value="#[message.inboundProperties.'http.query.params'.limit]"/>
+            </http:request-builder>
+        </http:request>
+         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <message-properties-transformer doc:name="Message Properties">
+            <add-message-property key="Content-Type" value="application/json"/>
+        </message-properties-transformer>
+        <object-to-string-transformer doc:name="Object to String"/>
+    </flow>
+    <flow name="cecurrencyInfoFlow">
+        <http:request config-ref="HTTP_Request_Configuration" path="{id}/?convert=AUD" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:uri-param paramName="id" value="#[message.inboundProperties.'http.query.params'.id]"/>
+            </http:request-builder>
+        </http:request>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <message-properties-transformer doc:name="Message Properties">
+            <add-message-property key="Content-Type" value="application/json"/>
+        </message-properties-transformer>
+        <object-to-string-transformer doc:name="Object to String"/>
+    </flow>
+   
+   
+    <flow name="cecurrencyInfoSymbolFlow">
+        <http:request config-ref="HTTP_Request_Configuration" path="/?convert=AUD" method="GET" doc:name="HTTP"/>
+        <custom-transformer class="ceexchange.Symbol" doc:name="Java"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <message-properties-transformer doc:name="Message Properties">
+            <add-message-property key="Content-Type" value="application/json"/>
+        </message-properties-transformer>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    </flow>
+
+
+</mule>
+
